@@ -2,11 +2,13 @@
 
 import { memo, ReactNode, ChangeEvent, useState } from "react";
 // react-hook-form
-import { FieldValues, useForm } from "react-hook-form";
+import { FieldValues, useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 // utils
-import { InputType } from "@/utils/types";
+import { InputType, formSchema } from "@/utils/types";
 //  hooks
 import useGlobalData from "@/hooks/useGlobalData";
+// components
 import Rating from "../Ratings";
 import FileUpload from "../FileUpload";
 
@@ -25,20 +27,30 @@ type Props = {
 const DynamicForm = (props: Props) => {
   const { data: globalData, setData } = useGlobalData();
 
-  const data = globalData.find((val) => val.id == props.id);
+  const dataIndex = globalData.findIndex((val) => val.id == props.id);
+  const isData = dataIndex === -1 ? false : true;
+
+  if (!isData) return <h1>Error Occured</h1>;
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm();
+    control,
+  } = useForm({
+    resolver: zodResolver(formSchema),
+  });
+
+  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({
+    control,
+    name: globalData[dataIndex].formTitle.replace(" ", "-"),
+  });
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>, questionId: string) {
     if (e.target.files && e.target.files[0]) {
       const newData = [...globalData];
-      const a = newData.findIndex((val) => val.id === data?.id);
-      const b = newData[a].form.findIndex((val) => val.questionId === questionId);
-      newData[a].form[b].answer = e.target.files[0];
+      const b = newData[dataIndex].form.findIndex((val) => val.questionId === questionId);
+      newData[dataIndex].form[b].answer = e.target.files[0];
       localStorage.setItem("globalData", JSON.stringify(newData));
       setData(newData);
     }
@@ -46,9 +58,8 @@ const DynamicForm = (props: Props) => {
 
   function handleRatingChange(e: number, questionId: string) {
     const newData = [...globalData];
-    const a = newData.findIndex((val) => val.id === data?.id);
-    const b = newData[a].form.findIndex((val) => val.questionId === questionId);
-    newData[a].form[b].answer = e;
+    const b = newData[dataIndex].form.findIndex((val) => val.questionId === questionId);
+    newData[dataIndex].form[b].answer = e;
     localStorage.setItem("globalData", JSON.stringify(newData));
     setData(newData);
   }
@@ -66,7 +77,7 @@ const DynamicForm = (props: Props) => {
     );
   };
 
-  const renderFormControl = (field: InputType) => {
+  const renderFormControl = (field: InputType, index: number) => {
     switch (field.type) {
       case "Short Text":
       case "Email":
@@ -194,11 +205,11 @@ const DynamicForm = (props: Props) => {
       <div className="relative flex min-h-screen w-full items-start justify-center overflow-auto bg-gradient-to-tr from-indigo-100 via-purple-50 to-teal-100 px-4">
         <div className="my-5 bg-white px-5 py-20 shadow sm:rounded-lg sm:px-10 lg:w-[50rem]">
           <h1 className="mb-16 text-6xl font-bold text-gray-900">
-            {data?.formTitle}
+            {globalData[dataIndex]?.formTitle}
           </h1>
-          {data ? (
+          {isData ? (
             <form onSubmit={handleSubmit(props.onSubmit)} noValidate>
-              {data.form.map((val) => renderFormControl(val))}
+              {globalData[dataIndex].form.map((val, index) => renderFormControl(val, index))}
               <button
                 className="mt-3 w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 disabled={isSubmitting}
