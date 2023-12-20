@@ -63,10 +63,15 @@ export function GlobalDataProvider({ children }: { children: React.ReactNode }) 
     },
   ]);
 
+  const setVal = () => {
+    localStorage.setItem("globalData", JSON.stringify(data));
+    return setData
+  }
+
   const value = useMemo(
     () => ({
       data,
-      setData,
+      setData: setVal,
     }),
     [data],
   );

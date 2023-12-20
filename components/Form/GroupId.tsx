@@ -59,7 +59,6 @@ export default function Index() {
     const newD = [...data];
     newD[0].proof = selectedIds;
     setData(newD);
-    localStorage.setItem("globalData", JSON.stringify(newD));
     router.push("/form/1/deposit");
   }
 

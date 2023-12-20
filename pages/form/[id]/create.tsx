@@ -29,21 +29,18 @@ function QuestionCard() {
     } else {
       newGdata[selectedIndex].form[formIndex].validation.required = "";
     }
-    localStorage.setItem("globalData", JSON.stringify(newGdata));
     setData(newGdata);
   }
 
   function addOption(formIndex: number, index: number) {
     const newGdata = [...globalData];
     newGdata[selectedIndex].form[formIndex].options?.splice(index + 1, 0, "");
-    localStorage.setItem("globalData", JSON.stringify(newGdata));
     setData(newGdata);
   }
 
   function deleteOption(formIndex: number, index: number) {
     const newGdata = [...globalData];
     newGdata[selectedIndex].form[formIndex].options?.splice(index, 1);
-    localStorage.setItem("globalData", JSON.stringify(newGdata));
     setData(newGdata);
   }
 
@@ -58,14 +55,12 @@ function QuestionCard() {
     else if (op) newGdata[selectedIndex].form[index][op] = e.target.value;
     else if (formIndex)
       newGdata[selectedIndex].form[formIndex].options[index] = e.target.value;
-    localStorage.setItem("globalData", JSON.stringify(newGdata));
     setData(newGdata);
   }
 
   function deleteCard(index: number) {
     const newGdata = [...globalData];
     newGdata[selectedIndex].form.splice(index, 1);
-    localStorage.setItem("globalData", JSON.stringify(newGdata));
     setData(newGdata);
   }
 
